@@ -5,13 +5,16 @@ namespace LaravelDaily\LaravelCharts\Classes;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Validator;
+use JsonSerializable;
 
-class LaravelChart {
+class LaravelChart implements JsonSerializable
+{
 
     public $options = [];
     private $data = [];
 
     const GROUP_PERIODS = [
+        'time' => 'H',
         'day' => 'Y-m-d',
         'week' => 'Y-W',
         'month' => 'Y-m',
@@ -34,15 +37,24 @@ class LaravelChart {
                 return [];
             }
 
-            $query = $this->options['model']::when(isset($this->options['filter_field']), function($query) {
+            $query = $this->options['model']::when(isset($this->options['filter_field']), function ($query) {
                 if (isset($this->options['filter_days'])) {
-                    return $query->where($this->options['filter_field'], '>=',
-                        now()->subDays($this->options['filter_days'])->format('Y-m-d'));
+                    return $query->where(
+                        $this->options['filter_field'],
+                        '>=',
+                        now()->subDays($this->options['filter_days'])->format('Y-m-d')
+                    );
                 } else if (isset($this->options['filter_period'])) {
                     switch ($this->options['filter_period']) {
-                        case 'week': $start = date('Y-m-d', strtotime('last Monday')); break;
-                        case 'month': $start = date('Y-m') . '-01'; break;
-                        case 'year': $start = date('Y') . '-01-01'; break;
+                        case 'week':
+                            $start = date('Y-m-d', strtotime('last Monday'));
+                            break;
+                        case 'month':
+                            $start = date('Y-m') . '-01';
+                            break;
+                        case 'year':
+                            $start = date('Y') . '-01-01';
+                            break;
                     }
                     if (isset($start)) {
                         return $query->where($this->options['filter_field'], '>=', $start);
@@ -65,21 +77,21 @@ class LaravelChart {
                 ->groupBy(function ($entry) {
                     if ($this->options['report_type'] == 'group_by_string') {
                         return $entry->{$this->options['group_by_field']};
-                    }
-                    else if ($this->options['report_type'] == 'group_by_relationship') {
+                    } else if ($this->options['report_type'] == 'group_by_relationship') {
                         if ($entry->{$this->options['relationship_name']}) {
                             return $entry->{$this->options['relationship_name']}->{$this->options['group_by_field']};
                         } else {
                             return '';
                         }
-                    }
-                    else if ($entry->{$this->options['group_by_field']} instanceof \Carbon\Carbon) {
+                    } else if ($entry->{$this->options['group_by_field']} instanceof \Carbon\Carbon) {
                         return $entry->{$this->options['group_by_field']}
                             ->format(self::GROUP_PERIODS[$this->options['group_by_period']]);
                     } else {
                         if ($entry->{$this->options['group_by_field']}) {
-                            return \Carbon\Carbon::createFromFormat($this->options['group_by_field_format'] ?? 'Y-m-d H:i:s',
-                                $entry->{$this->options['group_by_field']})
+                            return \Carbon\Carbon::createFromFormat(
+                                $this->options['group_by_field_format'] ?? 'Y-m-d H:i:s',
+                                $entry->{$this->options['group_by_field']}
+                            )
                                 ->format(self::GROUP_PERIODS[$this->options['group_by_period']]);
                         } else {
                             return '';
@@ -165,4 +177,8 @@ class LaravelChart {
         return '<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>';
     }
 
+    public function jsonSerialize()
+    {
+        return 'here';
+    }
 }

@@ -1,13 +1,11 @@
 {
-    "name": "laraveldaily/laravel-charts",
+    "name": "alhaji-aki/laravel-charts",
     "description": "Create charts and reports from Laravel",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Povilas Korop",
-            "email": "povilas@laraveldaily.com"
-        }
-    ],
+    "authors": [{
+        "name": "Povilas Korop",
+        "email": "povilas@laraveldaily.com"
+    }],
     "minimum-stability": "dev",
     "require": {},
     "autoload": {
